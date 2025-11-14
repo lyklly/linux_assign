@@ -1,0 +1,4 @@
+clang==14.0
+tqdm==4.67.1
+tree_sitter==0.23.0
+tree_sitter_c==0.23.0
