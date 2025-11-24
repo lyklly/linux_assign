@@ -82,7 +82,7 @@ def extract_mount_to_relations(
         return None
 
     def find_identifier(node):
-        if node is None:
+        if node is None or node.type == 'pointer_expression':
             return None
         if node.type == 'identifier':
             return node
@@ -114,10 +114,16 @@ def extract_mount_to_relations(
                 current_scope = get_text(func_node).strip()
 
         if node.type == 'call_expression' and 'DELAYED_WORK' in get_text(node):
+            arg_node = None
+            for child in node.children:
+                if child.type == 'argument_list':
+                    arg_node = child
+                    break
             field_node = find_field_identifier(node)
-            func_node = find_identifier(node)
+            func_node = find_identifier(arg_node)
 
             field_name = get_text(field_node).strip()
+            visible_files = file_visibility.get(current_file_path, {current_file_path})
             field_id = resolve_name_with_visibility(field_name, current_scope, visible_files)
 
             func_name = get_text(func_node).strip()
@@ -134,7 +140,7 @@ def extract_mount_to_relations(
                 
                 if relation not in mount_relations:
                     mount_relations.append(relation)
-
+                return
         # 递归遍历
         for child in node.children:
             traverse(child, current_scope)
